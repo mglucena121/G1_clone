@@ -18,6 +18,9 @@ export default function Login() {
 
       localStorage.setItem("token", response.data.token);
 
+      // salva o usuário com nome
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
       navigate("/admin"); // redireciona após login
     } catch (error) {
       alert("Credenciais inválidas!");
