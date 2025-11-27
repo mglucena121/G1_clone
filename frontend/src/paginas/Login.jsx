@@ -1,11 +1,34 @@
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 export default function Login() {
+  const navigate = useNavigate(); // necessário para redirecionar
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
+
+      localStorage.setItem("token", response.data.token);
+
+      navigate("/admin"); // redireciona após login
+    } catch (error) {
+      alert("Credenciais inválidas!");
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-700 to-slate-800">
+    <form
+      onSubmit={handleLogin}
+      className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-700 to-slate-800"
+    >
       {/* container */}
       <div className="w-full max-w-sm p-8 bg-slate-900/40 backdrop-blur-xl rounded-2xl shadow-xl border border-white/10">
         
@@ -38,11 +61,12 @@ export default function Login() {
 
         {/* Login Button */}
         <button
+          type="submit"
           className="w-full py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition"
         >
           Login
         </button>
       </div>
-    </div>
+    </form>
   );
 }
