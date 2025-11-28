@@ -6,11 +6,16 @@ import cors from "cors";
 import authRoutes from "./src/routes/authRoutes.js";
 import seedAdmin from "./src/utils/seedAdmin.js";
 
+import { swaggerDocs } from "./config/swagger.js";
+
 dotenv.config();
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Ativa SWAGGER aqui:
+swaggerDocs(app);
 
 // rotas públicas
 app.use("/api/auth", authRoutes);
