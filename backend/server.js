@@ -5,6 +5,7 @@ import cors from "cors";
 
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
+import adminRoutes from "./src/routes/admin.routes.js";
 import seedAdmin from "./src/utils/seedAdmin.js";
 
 import { swaggerDocs } from "./config/swagger.js";
@@ -20,6 +21,9 @@ swaggerDocs(app);
 
 // rotas públicas
 app.use("/api/auth", authRoutes);
+
+// rotas admin
+app.use("/api/admin", adminRoutes);
 
 // rotas user
 app.use("/api/users", userRoutes);
