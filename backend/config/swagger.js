@@ -9,6 +9,15 @@ const options = {
       version: "1.0.0",
       description: "Documentação da API do seu projeto",
     },
+    components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT"
+      }
+    }
+  }
   },
   apis: ["./src/routes/*.js"], 
 };
