@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
-import authRequired from "../middleware/authMiddleware.js";
+import { authRequired, adminOnly } from "../middleware/authMiddleware.js";
+
 
 const router = express.Router();
 
@@ -83,6 +84,7 @@ router.get("/:id", authRequired, async (req, res) => {
  *               - name
  *               - email
  *               - password
+ *               - role
  *             properties:
  *               name:
  *                 type: string
@@ -90,6 +92,8 @@ router.get("/:id", authRequired, async (req, res) => {
  *                 type: string
  *               password:
  *                 type: string
+ *               role:
+ *                  type: string
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso
