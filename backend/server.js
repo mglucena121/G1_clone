@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import authRoutes from "./src/routes/authRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
 import seedAdmin from "./src/utils/seedAdmin.js";
 
 import { swaggerDocs } from "./config/swagger.js";
@@ -19,6 +20,9 @@ swaggerDocs(app);
 
 // rotas públicas
 app.use("/api/auth", authRoutes);
+
+// rotas user
+app.use("/api/users", userRoutes);
 
 // rota teste
 app.get("/", (req, res) => res.json({ ok: true }));
