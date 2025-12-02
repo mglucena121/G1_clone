@@ -9,6 +9,9 @@ export default function CriarUsuarios() {
   const [role, setRole] = useState("user");
   const [message, setMessage] = useState("");
 
+  // NOVO → estado para acompanhar se a sidebar está aberta
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -42,13 +45,18 @@ export default function CriarUsuarios() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-200">
+    <div className="min-h-screen bg-slate-200">
 
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar onToggle={setSidebarOpen} />
 
       {/* Conteúdo */}
-      <div className="flex-1 p-8">
+      <div
+        className={`
+          transition-all duration-300 p-8
+          ${sidebarOpen ? "ml-64" : "ml-16"}
+        `}
+      >
         <h1 className="text-3xl font-bold mb-6">Criar Usuário</h1>
 
         {message && (
@@ -57,7 +65,10 @@ export default function CriarUsuarios() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-md w-full max-w-lg">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 rounded-xl shadow-md w-full max-w-lg"
+        >
 
           <label className="block mb-2 font-semibold">Nome</label>
           <input

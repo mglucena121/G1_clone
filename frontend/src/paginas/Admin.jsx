@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar"; // importa o menu
+import Sidebar from "../components/Sidebar";
 
 export default function Admin() {
   const [name, setName] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true); // estado da sidebar
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,18 +23,22 @@ export default function Admin() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
     navigate("/login", { replace: true });
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-200">
+    <div className="min-h-screen bg-slate-200">
 
       {/* MENU LATERAL */}
-      <Sidebar />
+      <Sidebar onToggle={setSidebarOpen} />
 
       {/* CONTEÚDO PRINCIPAL */}
-      <div className="flex-1 p-8">
+      <div
+        className={`
+          transition-all duration-300 p-8
+          ${sidebarOpen ? "ml-64" : "ml-16"}
+        `}
+      >
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">
             Bem-vindo{ name ? `, ${name}` : "" }!
@@ -50,8 +55,6 @@ export default function Admin() {
         <p className="text-sm text-gray-600">
           Você está na área administrativa.
         </p>
-
-        {/* Aqui você vai colocar o conteúdo do CRUD futuramente */}
       </div>
     </div>
   );
