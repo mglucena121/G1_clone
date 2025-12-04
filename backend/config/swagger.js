@@ -1,34 +1,75 @@
+// ============================================================================
+//  IMPORTAÇÕES DO SWAGGER
+// ============================================================================
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
+// ============================================================================
+//  CONFIGURAÇÃO DO SWAGGER
+// ============================================================================
+// Aqui definimos:
+// - versão do OpenAPI
+// - título e descrição
+// - segurança (JWT)
+// - schemas globais (Users, News)
 const options = {
   definition: {
     openapi: "3.0.0",
+
     info: {
       title: "API G1 Clone",
       version: "1.0.0",
       description: "Documentação da API do seu projeto",
     },
+
     components: {
-    securitySchemes: {
-      bearerAuth: {
-        type: "http",
-        scheme: "bearer",
-        bearerFormat: "JWT"
-      }
-    }
-  }
+      // ======================================================================
+      //  AUTENTICAÇÃO (GLOBAL) — JWT Bearer
+      // ======================================================================
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+
+      // ======================================================================
+      //  SCHEMAS (MODELS) — usados nas respostas do Swagger
+      // ======================================================================
+      schemas: {
+        // 🔹 SCHEMA DE NOTÍCIA (NEWS)
+        News: {
+          type: "object",
+          properties: {
+            title: { type: "string", example: "Título da Notícia" },
+            subtitle: { type: "string", example: "Subtítulo da Notícia" },
+            text: { type: "string", example: "<p>Conteúdo em HTML...</p>" },
+            image: { type: "string", example: "/uploads/imagem.jpg" },
+            createdAt: { type: "string" },
+            updatedAt: { type: "string" },
+          },
+        },
+      },
+    },
   },
-  apis: ["./src/routes/*.js"], 
+
+  // SCAN DOS ARQUIVOS DAS ROTAS E MODELS
+  apis: ["./src/routes/*.js", "./src/models/*.js"],
 };
 
+// Gera o objeto final
 const swaggerSpec = swaggerJSDoc(options);
 
-// Função para registrar o Swagger na aplicação
+// Função utilizada no server.js
 export function swaggerDocs(app) {
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-  console.log("📄 Swagger disponível em: http://localhost:5000/api-docs");
+  console.log("Swagger disponível em: http://localhost:5000/api-docs");
 }
+
+// ============================================================================
+// SEÇÃO 1 — USERS (CRUD COMPLETO) — SEU CÓDIGO ORIGINAL
+// ============================================================================
 
 /**
  * @swagger
@@ -149,3 +190,53 @@ export function swaggerDocs(app) {
  *         description: Usuário não encontrado
  */
 
+// ============================================================================
+//  SEÇÃO 2 — NEWS (ROTAS DE NOTÍCIAS) — ADICIONADAS POR MIM
+// ============================================================================
+
+/**
+ * @swagger
+ * tags:
+ *   name: News
+ *   description: Rotas públicas de notícias
+ */
+
+/**
+ * @swagger
+ * /api/noticias:
+ *   get:
+ *     summary: Lista todas as notícias
+ *     tags: [News]
+ *     responses:
+ *       200:
+ *         description: Lista de notícias
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/News'
+ */
+
+/**
+ * @swagger
+ * /api/noticias/{id}:
+ *   get:
+ *     summary: Retorna uma notícia pelo ID
+ *     tags: [News]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Notícia encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/News'
+ *       404:
+ *         description: Notícia não encontrada
+ */

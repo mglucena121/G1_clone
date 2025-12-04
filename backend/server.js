@@ -2,43 +2,64 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import adminRoutes from "./src/routes/admin.routes.js";
+import conteudoRoutes from "./src/routes/conteudo.js";  
 import seedAdmin from "./src/utils/seedAdmin.js";
-
 import { swaggerDocs } from "./config/swagger.js";
+import noticiaRoutes from "./src/routes/noticia.routes.js";
 
 dotenv.config();
 const app = express();
 
+// Necessário para usar __dirname em ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(cors());
 app.use(express.json());
 
-// Ativa SWAGGER aqui:
+// -----------------------------------------------------
+// 🔥 SERVE A PASTA /uploads PUBLICAMENTE
+// -----------------------------------------------------
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// -----------------------------------------------------
+// 🔥 SWAGGER
+// -----------------------------------------------------
 swaggerDocs(app);
 
-// rotas públicas
-app.use("/api/auth", authRoutes);
+// -----------------------------------------------------
+// 🔥 ROTAS
+// -----------------------------------------------------
+app.use("/api/auth", authRoutes);       // rotas públicas
+app.use("/api/admin", adminRoutes);     // rotas admin
+app.use("/api/users", userRoutes);      // rotas usuário
+app.use("/api/conteudo", conteudoRoutes); // rota para upload e conteúdo
+app.use("/api/noticias", noticiaRoutes); // rota de notícias
 
-// rotas admin
-app.use("/api/admin", adminRoutes);
-
-// rotas user
-app.use("/api/users", userRoutes);
 
 // rota teste
 app.get("/", (req, res) => res.json({ ok: true }));
 
+// -----------------------------------------------------
+// 🔥 MONGODB
+// -----------------------------------------------------
 const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(process.env.MONGO_URI)
   .then(async () => {
     console.log("MongoDB conectado");
-    await seedAdmin(); // cria admin se não existir
-    app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+    await seedAdmin(); // cria admin padrão se não existir
+
+    app.listen(PORT, () => {
+      console.log(`Servidor rodando na porta ${PORT}`);
+    });
   })
   .catch((err) => {
     console.error("Erro conectando ao MongoDB:", err);
