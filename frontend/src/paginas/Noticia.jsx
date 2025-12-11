@@ -1,113 +1,56 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
-import Sidebar from "../components/Sidebar";
-import { Editor } from "@tinymce/tinymce-react";
 
-export default function Conteudo() {
-  const [title, setTitle] = useState("");
-  const [subtitle, setSubtitle] = useState("");
-  const [image, setImage] = useState(null);
-  const [text, setText] = useState("");
+export default function Noticia() {
+  const { id } = useParams();
+  const [noticia, setNoticia] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("subtitle", subtitle);
-    formData.append("text", text);
-    if (image) formData.append("image", image);
-
-    try {
-      await axios.post("http://localhost:5000/api/content", formData);
-      alert("Notícia criada com sucesso!");
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao criar notícia");
+  useEffect(() => {
+    async function load() {
+      try {
+        // <- OBS: rota corrigida para /api/conteudo/:id (pt-BR)
+        const res = await axios.get(`http://localhost:5000/api/conteudo/${id}`);
+        console.log("Resposta API (noticia):", res.data);
+        setNoticia(res.data);
+      } catch (err) {
+        console.error("Erro ao carregar notícia", err);
+        setNoticia(null);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+
+    load();
+  }, [id]);
+
+  if (loading) return <p className="text-center mt-10">Carregando notícia...</p>;
+  if (!noticia) return <p className="text-center mt-10 text-red-600">Notícia não encontrada.</p>;
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="w-full min-h-screen bg-gray-100 py-10">
+      <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
 
-      {/* Conteúdo da página */}
-      <div className="flex-1 p-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* IMAGEM: como seu controller salva "/uploads/arquivo", montamos a URL assim */}
+        {noticia.image && (
+          <img
+            src={`http://localhost:5000${noticia.image}`}
+            alt={noticia.title}
+            className="w-full rounded-xl mb-6 object-cover"
+          />
+        )}
 
-          {/* Formulário */}
-          <div className="bg-white p-8 rounded-xl shadow">
-            <h1 className="text-2xl font-bold mb-6">Criar Novo Conteúdo</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{noticia.title}</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="font-semibold">Título</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-3 border rounded-lg mt-1"
-                />
-              </div>
+        {noticia.subtitle && (
+          <p className="text-gray-600 text-lg mb-6">{noticia.subtitle}</p>
+        )}
 
-              <div>
-                <label className="font-semibold">Subtítulo</label>
-                <input
-                  type="text"
-                  value={subtitle}
-                  onChange={(e) => setSubtitle(e.target.value)}
-                  className="w-full p-3 border rounded-lg mt-1"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold">Imagem</label>
-                <input
-                  type="file"
-                  onChange={(e) => setImage(e.target.files[0])}
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <label className="font-semibold">Conteúdo (Rich Text)</label>
-                <Editor
-                  apiKey="aa8jodr16nus7m7zo3n70nupdln2l48nw85tnh09g2jkyamu"
-                  init={{
-                    height: 300,
-                    menubar: true,
-                    plugins: "link image code lists table",
-                    toolbar:
-                      "undo redo | bold italic underline | bullist numlist | link image | code",
-                  }}
-                  onEditorChange={(content) => setText(content)}
-                />
-              </div>
-
-              <button className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg w-full">
-                Publicar Notícia
-              </button>
-            </form>
-          </div>
-
-          {/* Prévia */}
-          <div className="bg-white p-8 rounded-xl shadow">
-            <h2 className="text-2xl font-bold mb-4">Prévia do Conteúdo</h2>
-
-            <h1 className="text-xl font-bold">{title || "O título aparecerá aqui"}</h1>
-            <p className="text-gray-600 mt-1">
-              {subtitle || "O subtítulo aparecerá aqui"}
-            </p>
-
-            <div
-              className="prose mt-4"
-              dangerouslySetInnerHTML={{
-                __html: text || "<p>O conteúdo aparecerá aqui conforme você escrever.</p>",
-              }}
-            ></div>
-          </div>
-        </div>
+        <div
+          className="prose max-w-none"
+          dangerouslySetInnerHTML={{ __html: noticia.text }}
+        />
       </div>
     </div>
   );
