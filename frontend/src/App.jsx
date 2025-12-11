@@ -15,7 +15,7 @@ function App() {
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin/criar-usuarios" element={<CriarUsuarios />} />
       <Route path="/admin/conteudo" element={<Conteudo />} />
-      <Route path="/admin/noticias" element={<Noticias />} />
+      <Route path="/noticias" element={<Noticias />} />
       <Route path="/admin/noticia/:id" element={<Noticia />} />
     </Routes>
   );
