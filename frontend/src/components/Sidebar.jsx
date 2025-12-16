@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, Home, Users } from "lucide-react";
+import { Menu, X, Home, Users, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom"; // ⬅️ IMPORT NECESSÁRIO
 
 export default function Sidebar({ onToggle }) {
@@ -29,20 +29,22 @@ export default function Sidebar({ onToggle }) {
         `}
       >
         <div className="flex items-center justify-between mb-10">
-          {open && <h2 className="text-xl font-semibold">Menu</h2>}
+          {open && <h2 className="text-xl font-semibold">Menu Admin</h2>}
           <button className="hidden md:block" onClick={toggleSidebar}>
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
-        {/* Dashboard */}
-        <Link
-          to="/admin"
-          className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
-        >
-          <Home size={20} />
-          {open && <span>Dashboard</span>}
-        </Link>
+        {/* Dashboard — apenas admin */}
+        {user?.role === "admin" && (
+          <Link
+            to="/admin"
+            className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
+          >
+            <BarChart3 size={20} />
+            {open && <span>Dashboard</span>}
+          </Link>
+        )}
 
         {/* CRUD de usuários — apenas admin */}
         {user?.role === "admin" && (
