@@ -146,6 +146,8 @@ router.delete("/:id", authRequired, deletarConteudo);
  *                 type: string
  *               text:
  *                 type: string
+ *               category:
+ *                 type: string
  *               image:
  *                 type: string
  *                 format: binary
