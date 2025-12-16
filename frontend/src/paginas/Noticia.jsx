@@ -32,6 +32,15 @@ export default function Noticia() {
     <div className="w-full min-h-screen bg-gray-100 py-10">
       <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
 
+        {/* CATEGORIA - BADGE */}
+        {noticia.category && (
+          <div className="mb-4">
+            <span className="inline-block bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold uppercase tracking-wide">
+              {noticia.category}
+            </span>
+          </div>
+        )}
+
         {/* IMAGEM: como seu controller salva "/uploads/arquivo", montamos a URL assim */}
         {noticia.image && (
           <img

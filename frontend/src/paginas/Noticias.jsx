@@ -43,6 +43,15 @@ export default function Noticias() {
 
               {/* TEXTOS */}
               <div className="p-4">
+                {/* CATEGORIA*/}
+                {noticia.category && (
+                  <div className="mb-2">
+                    <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">
+                      {noticia.category}
+                    </span>
+                  </div>
+                )}
+
                 <h2 className="text-xl font-semibold mb-1 text-gray-800 line-clamp-2">
                   {noticia.title}
                 </h2>
