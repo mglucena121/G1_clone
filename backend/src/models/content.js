@@ -26,6 +26,15 @@ const ContentSchema = new mongoose.Schema(
       type: String,
       required: false,
         },
+    category: {
+      type: String,
+      enum: ["esporte", "evento", "novidades"], // apenas esses valores são aceitos
+      required: true, // categoria é obrigatória
+    },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // quem criou (admin ou user)
+    },    
   },
   {
     timestamps: true, // cria automaticamente createdAt e updatedAt

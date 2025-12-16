@@ -1,7 +1,7 @@
 import Content from "../models/content.js";
 
 /**
- * Criar conteúdo (já existia)
+ * Criar conteúdo 
  */
 export async function criarConteudo(req, res) {
   try {
@@ -9,10 +9,10 @@ export async function criarConteudo(req, res) {
       return res.status(400).json({ error: "Imagem é obrigatória." });
     }
 
-    const { title, text, subtitle } = req.body;
+    const { title, text, subtitle, category } = req.body;
 
-    if (!title || !text) {
-      return res.status(400).json({ error: "Título e texto são obrigatórios." });
+    if (!title || !text || !category) {
+      return res.status(400).json({ error: "Título, texto e categoria são obrigatórios." });
     }
 
     const imagePath = `/uploads/${req.file.filename}`;
@@ -21,6 +21,7 @@ export async function criarConteudo(req, res) {
       title,
       subtitle,
       text,
+      category,
       image: imagePath,
       author: req.user?.id, // opcional, só funciona se guardar usuário
     });
@@ -100,9 +101,9 @@ export async function deletarConteudo(req, res) {
 export async function editarConteudo(req, res) {
   try {
     const { id } = req.params;
-    const { title, text, subtitle } = req.body;
+    const { title, text, subtitle, category } = req.body;
 
-    const updateData = { title, text, subtitle };
+    const updateData = { title, text, subtitle, category };
 
     // Se veio imagem nova, substituímos a antiga
     if (req.file) {

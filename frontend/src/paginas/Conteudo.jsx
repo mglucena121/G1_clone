@@ -11,6 +11,7 @@ export default function Conteudo() {
   const [subtitle, setSubtitle] = useState("");
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
+  const [category, setCategory] = useState("");
 
   // Preview visual
   const [previewImage, setPreviewImage] = useState(null);
@@ -31,6 +32,7 @@ export default function Conteudo() {
       formData.append("title", title);
       formData.append("text", text);
       formData.append("subtitle", subtitle);
+      formData.append("category", category);
       formData.append("image", image); // arquivo real
 
       const token = localStorage.getItem("token");
@@ -51,6 +53,7 @@ export default function Conteudo() {
       setTitle("");
       setSubtitle("");
       setText("");
+      setCategory("");
       setImage(null);
       setPreviewImage(null);
 
@@ -114,6 +117,22 @@ export default function Conteudo() {
                   className="w-full mt-1 p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
                   placeholder="Digite o subtítulo"
                 />
+              </div>
+
+              {/* Categoria */}
+              <div>
+                <label className="font-semibold text-gray-700">Categoria</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full mt-1 p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                  required
+                >
+                  <option value="">Selecione uma categoria</option>
+                  <option value="esporte">Esporte</option>
+                  <option value="evento">Evento</option>
+                  <option value="novidades">Novidades</option>
+                </select>
               </div>
 
               {/* Imagem */}
@@ -202,6 +221,12 @@ export default function Conteudo() {
               <h3 className="text-2xl font-bold text-gray-900">
                 {title || "O título aparecerá aqui"}
               </h3>
+
+              <div className="mb-3">
+                <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  {category || "Categoria"}
+                </span>
+              </div>
 
               <p className="text-gray-600 mt-2 italic">
                 {subtitle || "O subtítulo aparecerá aqui"}
