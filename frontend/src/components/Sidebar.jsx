@@ -46,8 +46,8 @@ export default function Sidebar({ onToggle }) {
           </button>
         </div>
 
-        {/* Dashboard — apenas admin */}
-        {user?.role === "admin" && (
+        {/* Dashboard — admin e user */}
+        {(user?.role === "admin" || user?.role === "user") && (
           <Link
             to="/admin"
             className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
@@ -68,23 +68,27 @@ export default function Sidebar({ onToggle }) {
           </Link>
         )}
 
-        {/* Cria conteúdo */}
-        <Link
-          to="/admin/conteudo"
-          className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
-        >
-          <FilePlus size={20} />
-          {open && <span>Criar-Conteúdo</span>}
-        </Link>
+        {/* Cria conteúdo — admin e user */}
+        {(user?.role === "admin" || user?.role === "user") && (
+          <Link
+            to="/admin/conteudo"
+            className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
+          >
+            <FilePlus size={20} />
+            {open && <span>Criar-Conteúdo</span>}
+          </Link>
+        )}
 
-        {/* Ver noticias */}
-         <Link
-          to="/admin/noticias"
-          className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
-        >
-          <Home size={20} />
-          {open && <span>Ver Notícias</span>}
-        </Link>
+        {/* Ver noticias — apenas admin */}
+        {(user?.role === "admin" || user?.role === "user") && (
+          <Link
+            to="/admin/noticias"
+            className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
+          >
+            <Home size={20} />
+            {open && <span>Ver Notícias</span>}
+          </Link>
+        )}
         
         {/* Logout */}
         <div className="mt-auto">

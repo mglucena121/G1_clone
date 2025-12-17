@@ -21,7 +21,8 @@ export default function Login() {
       // salva o usuário com nome
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      navigate("/admin"); // redireciona após login
+      // redireciona para a mesma rota; a `Sidebar` controla o que cada role vê
+      navigate("/admin");
     } catch (error) {
       alert("Credenciais inválidas!");
     }

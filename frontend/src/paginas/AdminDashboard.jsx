@@ -24,9 +24,9 @@ export default function AdminDashboard() {
     try {
       const user = JSON.parse(storedUser);
       
-      // Verifica se é admin
-      if (user.role !== "admin") {
-        navigate("/noticias", { replace: true });
+      // Permite acesso para `admin` e `user`
+      if (user.role !== "admin" && user.role !== "user") {
+        navigate("/login", { replace: true });
         return;
       }
       

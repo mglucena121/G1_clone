@@ -17,6 +17,8 @@ function App() {
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/criar-usuarios" element={<CriarUsuarios />} />
       <Route path="/admin/conteudo" element={<Conteudo />} />
+
+      {/* ROTAS PÚBLICAS */}
       <Route path="/noticias" element={<Noticias />} />
       <Route path="/noticia/:id" element={<Noticia />} />
     </Routes>
