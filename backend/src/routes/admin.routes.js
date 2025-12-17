@@ -1,103 +1,82 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import Content from "../models/content.js";
 import { authRequired, adminOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Rota para listar todos os usuários — SOMENTE ADMIN
-router.get("/users", authRequired, adminOnly, async (req, res) => {
+// ...existing code... (usuários)
+
+// ============================================
+// ROTAS DE NOTÍCIAS
+// ============================================
+
+// GET /admin/noticias — listar notícias (admin vê todas, user vê só as suas)
+router.get("/noticias", authRequired, async (req, res) => {
   try {
-    const users = await User.find().select("-passwordHash"); // remove senha
+    const filter = req.user.role === "admin" ? {} : { author: req.user.id };
+    const noticias = await Content.find(filter)
+      .populate("author", "name email")
+      .sort({ createdAt: -1 });
 
-    res.status(200).json({ users });
-  } catch (error) {
-    console.error("Erro ao listar usuários:", error);
-    res.status(500).json({ error: "Erro ao buscar usuários" });
-  }
-});
-
-// Rota para atualizar usuário — SOMENTE ADMIN
-router.put("/users/:id", authRequired, adminOnly, async (req, res) => {
-  try {
-    const { name, email, role } = req.body;
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, email, role },
-      { new: true } // retorna objeto atualizado
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
-    }
-
-    res.status(200).json({
-      message: "Usuário atualizado com sucesso",
-      user: updatedUser,
-    });
-
-  } catch (error) {
-    console.error("Erro ao atualizar usuário:", error);
-    res.status(500).json({ error: "Erro ao atualizar usuário" });
-  }
-});
-
-// ROTA DELETE - remover usuário — SOMENTE ADMIN
-router.delete("/users/:id", authRequired, adminOnly, async (req, res) => {
-  try {
-    const userId = req.params.id;
-
-    const deleted = await User.findByIdAndDelete(userId);
-
-    if (!deleted) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
-    }
-
-    return res.status(200).json({ message: "Usuário deletado com sucesso" });
+    res.status(200).json(noticias);
   } catch (err) {
-    console.error("Erro ao deletar usuário:", err);
-    return res.status(500).json({ error: "Erro ao deletar usuário" });
+    console.error("Erro ao listar notícias:", err);
+    res.status(500).json({ error: "Erro ao listar notícias" });
   }
 });
 
-
-// Rota para criar usuário — SOMENTE ADMIN
-router.post("/create-user", authRequired, adminOnly, async (req, res) => {
+// PUT /admin/noticias/:id — atualizar notícia (validação no controller)
+router.put("/noticias/:id", authRequired, async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { id } = req.params;
+    const noticia = await Content.findById(id);
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "Preencha todos os campos" });
+    if (!noticia) {
+      return res.status(404).json({ error: "Notícia não encontrada" });
     }
 
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(400).json({ error: "Email já está em uso" });
+    // Validar permissão: só admin ou autor
+    if (req.user.role !== "admin" && noticia.author.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Acesso negado" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const { title, text, image, subtitle, category } = req.body;
+    if (title) noticia.title = title;
+    if (text) noticia.text = text;
+    if (image !== undefined) noticia.image = image;
+    if (subtitle !== undefined) noticia.subtitle = subtitle;
+    if (category) noticia.category = category;
 
-    const newUser = await User.create({
-      name,
-      email,
-      passwordHash: hashedPassword,
-      role: role || "user",
-    });
+    await noticia.save();
+    res.status(200).json(noticia);
+  } catch (err) {
+    console.error("Erro ao atualizar notícia:", err);
+    res.status(500).json({ error: "Erro ao atualizar notícia" });
+  }
+});
 
-    res.status(201).json({
-      message: "Usuário criado com sucesso",
-      user: {
-        id: newUser._id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-      },
-    });
+// DELETE /admin/noticias/:id — deletar notícia (validação no controller)
+router.delete("/noticias/:id", authRequired, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const noticia = await Content.findById(id);
 
-  } catch (error) {
-    console.error("Erro ao criar usuário:", error);
-    res.status(500).json({ error: "Erro no servidor" });
+    if (!noticia) {
+      return res.status(404).json({ error: "Notícia não encontrada" });
+    }
+
+    // Validar permissão: só admin ou autor
+    if (req.user.role !== "admin" && noticia.author.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Acesso negado" });
+    }
+
+    await Content.findByIdAndDelete(id);
+    res.status(200).json({ message: "Notícia deletada com sucesso" });
+  } catch (err) {
+    console.error("Erro ao deletar notícia:", err);
+    res.status(500).json({ error: "Erro ao deletar notícia" });
   }
 });
 
