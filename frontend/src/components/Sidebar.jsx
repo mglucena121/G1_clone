@@ -1,14 +1,23 @@
 import { useState } from "react";
-import { Menu, X, Home, Users, BarChart3 } from "lucide-react";
-import { Link } from "react-router-dom"; // ⬅️ IMPORT NECESSÁRIO
+import { Menu, X, Home, Users, BarChart3, FilePlus, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom" ;
 
 export default function Sidebar({ onToggle }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const toggleSidebar = () => {
-    setOpen(!open);
-    if (onToggle) onToggle(!open);
+  const setSidebar = (next) => {
+    setOpen(next);
+    if (onToggle) onToggle(next);
+  };
+
+  const toggleSidebar = () => setSidebar(!open);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -22,6 +31,8 @@ export default function Sidebar({ onToggle }) {
       </button>
 
       <div
+        onMouseEnter={() => setSidebar(true)}
+        onMouseLeave={() => setSidebar(false)}
         className={`
           fixed top-0 left-0 h-screen bg-slate-900 text-white transition-all duration-300
           flex flex-col z-40
@@ -57,14 +68,43 @@ export default function Sidebar({ onToggle }) {
           </Link>
         )}
 
-        {/* Notícias */}
+        {/* Cria conteúdo */}
         <Link
           to="/admin/conteudo"
           className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
         >
-          <Home size={20} />
-          {open && <span>Notícias</span>}
+          <FilePlus size={20} />
+          {open && <span>Criar-Conteúdo</span>}
         </Link>
+
+        {/* Ver noticias */}
+         <Link
+          to="/admin/noticias"
+          className="flex items-center gap-3 mb-4 hover:bg-slate-700 p-2 rounded-lg transition"
+        >
+          <Home size={20} />
+          {open && <span>Ver Notícias</span>}
+        </Link>
+        
+        {/* Logout */}
+        <div className="mt-auto">
+          {open ? (
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-3 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition duration-200 shadow-lg"
+            >
+              <LogOut size={18} />
+              <span>Sair</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="mx-auto p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition duration-200 shadow-lg"
+            >
+              <LogOut size={16} />
+            </button>
+          )}
+        </div>
       </div>
     </>
   );
