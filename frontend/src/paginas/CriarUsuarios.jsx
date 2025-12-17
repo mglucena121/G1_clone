@@ -21,6 +21,8 @@ export default function CriarUsuarios() {
   const [showFormPanel, setShowFormPanel] = useState(true); // controla exibição do painel de formulário
   const [showModal, setShowModal] = useState(false); // para edição em modal (opcional)
 
+  const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
   // Mensagem temporária
   const flash = (txt, timeout = 3000) => {
     setMessage(txt);
@@ -37,12 +39,12 @@ export default function CriarUsuarios() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/users", {
+      const res = await axios.get(`${API}/api/users`, {
         headers: getAuthHeader(),
       });
-      setUsers(res.data.users);
+      setUsers(res.data);
     } catch (err) {
-      console.error("Erro ao buscar usuários:", err);
+      console.error("Erro ao buscar usuários:", err.response?.data || err.message);
       flash("Erro ao buscar usuários.");
     } finally {
       setLoading(false);
@@ -58,7 +60,7 @@ export default function CriarUsuarios() {
     e && e.preventDefault();
     try {
       await axios.post(
-        "http://localhost:5000/api/admin/create-user",
+        `${API}/api/users`,
         { name, email, password, role },
         { headers: getAuthHeader() }
       );
@@ -81,7 +83,7 @@ export default function CriarUsuarios() {
       if (password) body.password = password;
 
       await axios.put(
-        `http://localhost:5000/api/admin/users/${editingUserId}`,
+        `${API}/api/users/${editingUserId}`,
         body,
         { headers: getAuthHeader() }
       );
@@ -102,7 +104,7 @@ export default function CriarUsuarios() {
     const confirm = window.confirm("Deseja remover este usuário?");
     if (!confirm) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admin/users/${id}`, {
+      await axios.delete(`${API}/api/admin/users/${id}`, {
         headers: getAuthHeader(),
       });
       flash("Usuário removido.");

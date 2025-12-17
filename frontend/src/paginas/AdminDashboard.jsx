@@ -12,24 +12,23 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
 
-    if (!storedUser) {
+    if (!storedUser || !token) {
       navigate("/login", { replace: true });
       return;
     }
 
     try {
       const user = JSON.parse(storedUser);
-      
-      // Permite acesso para `admin` e `user`
       if (user.role !== "admin" && user.role !== "user") {
         navigate("/login", { replace: true });
         return;
       }
-      
       setName(user.name);
     } catch (error) {
       console.error("Erro ao ler usuário:", error);
@@ -39,9 +38,15 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     async function fetchData() {
+      const token = localStorage.getItem("token");
+      if (!token) return navigate("/login", { replace: true });
+
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/conteudo");
+        // Usa /api/admin/noticias: admin vê todas; user vê apenas as dele (backend filtra)
+        const response = await axios.get(`${API}/api/admin/noticias`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const noticias = response.data;
 
         setTotalNoticias(noticias.length);
@@ -49,9 +54,9 @@ export default function AdminDashboard() {
         // Contar noticias por categoria
         const categoriasCount = {};
         const cores = {
-          "esporte": "bg-green-500",
-          "evento": "bg-purple-500",
-          "novidades": "bg-indigo-500",
+          esporte: "bg-green-500",
+          evento: "bg-purple-500",
+          novidades: "bg-indigo-500",
         };
 
         noticias.forEach((noticia) => {
@@ -78,7 +83,7 @@ export default function AdminDashboard() {
     }
 
     fetchData();
-  }, []);
+  }, [API, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -88,15 +93,11 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* MENU LATERAL */}
       <Sidebar onToggle={setSidebarOpen} />
-
-      {/* CONTEÚDO PRINCIPAL */}
       <div
-        className={`
-          transition-all duration-300 p-6 sm:p-8
-          ${sidebarOpen ? "ml-64" : "ml-16"}
-        `}
+        className={`transition-all duration-300 p-6 sm:p-8 ${
+          sidebarOpen ? "ml-64" : "ml-16"
+        }`}
       >
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
@@ -108,13 +109,7 @@ export default function AdminDashboard() {
               Bem-vindo{name ? `, ${name}` : ""}!
             </p>
           </div>
-
-          <button
-            onClick={handleLogout}
-            className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition duration-200 shadow-lg"
-          >
-            Sair
-          </button>
+          {/* <button onClick={handleLogout} ...>Sair</button> */}
         </div>
 
         {/* CONTEÚDO DO DASHBOARD */}
@@ -136,7 +131,6 @@ export default function AdminDashboard() {
           <div className="space-y-8">
             {/* CARD PRINCIPAL - TOTAL DE NOTÍCIAS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Total de notícias */}
               <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-xl p-8 shadow-xl border border-indigo-500/30 hover:border-indigo-500/60 transition">
                 <div className="flex items-start justify-between">
                   <div>
@@ -157,7 +151,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Estatísticas rápidas */}
               <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl p-8 shadow-xl border border-purple-500/30 hover:border-purple-500/60 transition">
                 <div className="flex items-start justify-between">
                   <div>
@@ -177,7 +170,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Média por categoria */}
               <div className="bg-gradient-to-br from-green-600 to-green-800 rounded-xl p-8 shadow-xl border border-green-500/30 hover:border-green-500/60 transition">
                 <div className="flex items-start justify-between">
                   <div>
@@ -200,7 +192,6 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* DETALHAMENTO POR CATEGORIA */}
             <div className="bg-slate-800/50 backdrop-blur rounded-xl border border-slate-700/50 p-8 shadow-xl">
               <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                 <BarChart3 className="text-indigo-400" />
@@ -215,9 +206,7 @@ export default function AdminDashboard() {
                       <div key={idx} className="group">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
-                            <div
-                              className={`${cat.color} w-3 h-3 rounded-full`}
-                            ></div>
+                            <div className={`${cat.color} w-3 h-3 rounded-full`}></div>
                             <span className="text-gray-100 font-semibold capitalize">
                               {cat.name}
                             </span>
@@ -226,38 +215,29 @@ export default function AdminDashboard() {
                             {cat.count}
                           </span>
                         </div>
-
-                        {/* Barra de progresso */}
                         <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
                           <div
                             className={`${cat.color} h-full rounded-full transition-all duration-500 group-hover:brightness-110`}
-                            style={{
-                              width: `${(cat.count / totalNoticias) * 100}%`,
-                            }}
+                            style={{ width: `${(cat.count / totalNoticias) * 100}%` }}
                           ></div>
                         </div>
-
-                        {/* Porcentagem */}
                         <div className="mt-2 text-right text-xs text-gray-400">
-                          {Math.round((cat.count / totalNoticias) * 100)}% do
-                          total
+                          {Math.round((cat.count / totalNoticias) * 100)}% do total
                         </div>
                       </div>
                     ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-gray-400 text-lg">
-                    Nenhuma notícia encontrada
-                  </p>
+                  <p className="text-gray-400 text-lg">Nenhuma notícia encontrada</p>
                 </div>
               )}
             </div>
 
-            {/* RODAPÉ DO DASHBOARD */}
             <div className="text-center pt-8 border-t border-slate-700/50">
               <p className="text-gray-400 text-sm">
-                Dashboard atualizado em {new Date().toLocaleDateString("pt-BR", {
+                Dashboard atualizado em{" "}
+                {new Date().toLocaleDateString("pt-BR", {
                   day: "2-digit",
                   month: "2-digit",
                   year: "numeric",

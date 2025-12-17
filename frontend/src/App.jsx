@@ -1,6 +1,7 @@
 import Login from "./paginas/Login";
 import Admin from "./paginas/Admin";
 import AdminDashboard from "./paginas/AdminDashboard";
+import AdminNoticias from "./paginas/AdminNoticias";
 import CriarUsuarios from "./paginas/CriarUsuarios";
 import Noticia from "./paginas/Noticia";
 import Conteudo from "./paginas/Conteudo";
@@ -17,6 +18,7 @@ function App() {
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/criar-usuarios" element={<CriarUsuarios />} />
       <Route path="/admin/conteudo" element={<Conteudo />} />
+      <Route path="/admin/noticias" element={<AdminNoticias />} />
 
       {/* ROTAS PÚBLICAS */}
       <Route path="/noticias" element={<Noticias />} />

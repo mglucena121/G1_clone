@@ -1,28 +1,74 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Editor } from "@tinymce/tinymce-react";
-
-// ADICIONADO
 import Sidebar from "../components/Sidebar";
 
 export default function Conteudo() {
-  // Estados do conteúdo
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [text, setText] = useState("");
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(null);          // File selecionado
   const [category, setCategory] = useState("");
-
-  // Preview visual
-  const [previewImage, setPreviewImage] = useState(null);
-
-  // Mensagem de feedback
+  const [previewImage, setPreviewImage] = useState(null); // URL de prévia (arquivo ou já existente)
   const [message, setMessage] = useState("");
-
-  // ADICIONADO → controla recuo dependendo da sidebar
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Submit do formulário
+  const location = useLocation();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const params = new URLSearchParams(location.search);
+  const editingId = params.get("id");
+
+  const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  // Carrega notícia para edição, se houver ?id=
+  useEffect(() => {
+    if (!token || !user) {
+      navigate("/login", { replace: true });
+      return;
+    }
+    if (!editingId) return;
+
+    axios
+      .get(`${API}/api/conteudo/${editingId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const n = res.data;
+        setTitle(n.title || "");
+        setSubtitle(n.subtitle || "");
+        setText(n.text || "");
+        setCategory(n.category || "");
+        // se já tem imagem salva, monta URL para prévia
+        if (n.image) {
+          const isAbsolute = /^https?:\/\//i.test(n.image);
+          const base = API.replace(/\/$/, "");
+          const path = isAbsolute
+            ? n.image
+            : n.image.includes("/uploads/")
+            ? `${base}${n.image.startsWith("/") ? "" : "/"}${n.image}`
+            : `${base}/uploads/${n.image}`;
+          setPreviewImage(path);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Erro ao carregar notícia para edição");
+      });
+  }, [editingId, token, user, navigate, API]);
+
+  // Escolha de imagem
+  function handleImage(e) {
+    const file = e.target.files[0];
+    setImage(file || null);
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file));
+    }
+  }
+
+  // Submit: cria ou edita
   async function handleSubmit(e) {
     e.preventDefault();
     setMessage("");
@@ -33,68 +79,56 @@ export default function Conteudo() {
       formData.append("text", text);
       formData.append("subtitle", subtitle);
       formData.append("category", category);
-      formData.append("image", image); // arquivo real
+      // Só envia imagem se usuário selecionar uma nova
+      if (image) formData.append("image", image);
 
-      const token = localStorage.getItem("token");
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      };
 
-      const response = await axios.post(
-        "http://localhost:5000/api/conteudo",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,   // ✔ ÚNICO HEADER CORRETO
-          },
-        }
-      );
-
-      setMessage("Conteúdo criado com sucesso!");
-
-      // Limpar os campos
-      setTitle("");
-      setSubtitle("");
-      setText("");
-      setCategory("");
-      setImage(null);
-      setPreviewImage(null);
-
-      console.log(response.data);
+      if (editingId) {
+        // EDITAR
+        await axios.put(`${API}/api/conteudo/${editingId}`, formData, {
+          headers,
+        });
+        setMessage("Notícia atualizada com sucesso!");
+        // redirecionar após 1.5s
+        setTimeout(() => navigate("/admin/noticias"), 1500);
+      } else {
+        // CRIAR
+        await axios.post(`${API}/api/conteudo`, formData, { headers });
+        setMessage("Conteúdo criado com sucesso!");
+        // limpar campos
+        setTitle("");
+        setSubtitle("");
+        setText("");
+        setCategory("");
+        setImage(null);
+        setPreviewImage(null);
+      }
     } catch (error) {
       console.error(error);
-      setMessage("Erro ao criar conteúdo.");
-    }
-  }
-
-  // Quando escolhe imagem
-  function handleImage(e) {
-    const file = e.target.files[0];
-    setImage(file);
-
-    if (file) {
-      setPreviewImage(URL.createObjectURL(file));
+      setMessage("Erro ao salvar conteúdo.");
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-
-      {/* ADICIONADO — Sidebar */}
       <Sidebar onToggle={setSidebarOpen} />
-
-      {/* ADICIONADO — container que recua conforme sidebar */}
       <div
-        className={`transition-all duration-300 w-full p-6
-        ${sidebarOpen ? "ml-64" : "ml-16"}`}
+        className={`transition-all duration-300 w-full p-6 ${
+          sidebarOpen ? "ml-64" : "ml-16"
+        }`}
       >
         <div className="w-full max-w-6xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10">
-
           {/* FORMULÁRIO */}
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">
-              Criar Novo Conteúdo
+              {editingId ? "Editar Conteúdo" : "Criar Novo Conteúdo"}
             </h1>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              {/* Título */}
               <div>
                 <label className="font-semibold text-gray-700">Título</label>
                 <input
@@ -107,7 +141,6 @@ export default function Conteudo() {
                 />
               </div>
 
-              {/* Subtítulo */}
               <div>
                 <label className="font-semibold text-gray-700">Subtítulo</label>
                 <input
@@ -119,7 +152,6 @@ export default function Conteudo() {
                 />
               </div>
 
-              {/* Categoria */}
               <div>
                 <label className="font-semibold text-gray-700">Categoria</label>
                 <select
@@ -135,7 +167,6 @@ export default function Conteudo() {
                 </select>
               </div>
 
-              {/* Imagem */}
               <div>
                 <label className="font-semibold text-gray-700">Imagem</label>
                 <input
@@ -143,17 +174,21 @@ export default function Conteudo() {
                   accept="image/*"
                   onChange={handleImage}
                   className="block mt-2"
-                  required
+                  required={!editingId}   // na edição, opcional
                 />
+                {previewImage && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    Prévia abaixo. Se não selecionar nova imagem, mantém a atual.
+                  </p>
+                )}
               </div>
 
-              {/* Editor TinyMCE */}
               <div>
                 <label className="font-semibold text-gray-700 mb-1 block">
                   Conteúdo (Rich Text)
                 </label>
                 <Editor
-                  apiKey= "aa8jodr16nus7m7zo3n70nupdln2l48nw85tnh09g2jkyamu"
+                  apiKey="aa8jodr16nus7m7zo3n70nupdln2l48nw85tnh09g2jkyamu"
                   value={text}
                   onEditorChange={(v) => setText(v)}
                   init={{
@@ -192,7 +227,7 @@ export default function Conteudo() {
                 type="submit"
                 className="w-full bg-blue-600 text-white py-3 rounded-xl text-lg font-medium hover:bg-blue-700 transition shadow-sm"
               >
-                Publicar Conteúdo
+                {editingId ? "Salvar alterações" : "Publicar Conteúdo"}
               </button>
 
               {message && (
@@ -242,7 +277,6 @@ export default function Conteudo() {
               ></div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
