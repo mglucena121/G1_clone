@@ -57,8 +57,10 @@ mongoose
     console.log("MongoDB conectado");
     await seedAdmin(); // cria admin padrão se não existir
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Servidor rodando na porta ${PORT}`);
+      console.log(`Acesse localmente: http://localhost:${PORT}`);
+      console.log(`Acesse na rede: http://192.168.2.22:${PORT}`);
     });
   })
   .catch((err) => {
