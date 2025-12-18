@@ -9,13 +9,23 @@ const __dirname = path.dirname(__filename);
 // Configura onde e como os arquivos serão salvos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // pasta /uploads na raiz do projeto (já exposta no server.js)
+    // pasta /uploads na raiz do projeto
     cb(null, path.join(__dirname, "../uploads"));
   },
 
   filename: (req, file, cb) => {
-    // Rename: timestamp + nome original
-    cb(null, Date.now() + "-" + file.originalname);
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  const baseName = path.basename(file.originalname, ext);
+
+  const safeName = baseName
+    .toLowerCase()
+    .normalize("NFD")                  // remove acentos
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-")              // espaços → -
+    .replace(/[^a-z0-9-]/g, "");       // remove resto
+
+  cb(null, `${Date.now()}-${safeName}${ext}`);
   },
 });
 
