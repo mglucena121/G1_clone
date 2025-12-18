@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function Noticias() {
   const [noticiasAll, setNoticiasAll] = useState([]);
   const [noticias, setNoticias] = useState([]);
@@ -11,7 +13,7 @@ export default function Noticias() {
   useEffect(() => {
     async function fetchNoticias() {
       try {
-        const res = await axios.get("http://localhost:5000/api/conteudo");
+        const res = await axios.get(`${API_URL}/api/conteudo`);
         setNoticiasAll(res.data);
         setNoticias(res.data);
       } catch (err) {
@@ -104,7 +106,7 @@ export default function Noticias() {
               {noticia.image ? (
                 <div className="relative h-52 overflow-hidden">
                   <img
-                    src={`http://localhost:5000${noticia.image}`}
+                    src={`${API_URL}${noticia.image}`}
                     alt={noticia.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
