@@ -9,6 +9,8 @@ export default function Noticias() {
   const [noticias, setNoticias] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [page, setPage] = useState(1);
+  const noticiasPerPage = 9;
 
   useEffect(() => {
     async function fetchNoticias() {
@@ -30,6 +32,7 @@ export default function Noticias() {
     } else {
       setNoticias(noticiasAll.filter((n) => n.category === selectedCategory));
     }
+    setPage(1);
   }, [selectedCategory, noticiasAll]);
 
   const categories = [
@@ -38,6 +41,11 @@ export default function Noticias() {
     { key: "evento", label: "Evento" },
     { key: "novidades", label: "Novidades" },
   ];
+
+  // Calcula notícias da página atual
+  const startIndex = (page - 1) * noticiasPerPage;
+  const noticiasExibidas = noticias.slice(startIndex, startIndex + noticiasPerPage);
+  const totalPages = Math.ceil(noticias.length / noticiasPerPage);
 
   function categoryColor(cat) {
     switch (cat) {
@@ -53,7 +61,7 @@ export default function Noticias() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
+    <div className="w-full min-h-screen bg-gradient-to-b from-slate-200 via-slate-100 to-slate-100 py-12">
       <div className="max-w-6xl mx-auto px-4">
         <header className="flex items-center gap-4 mb-6">
           {/* Botão hambúrguer (esquerda) */}
@@ -96,11 +104,11 @@ export default function Noticias() {
 
         {/* GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {noticias.map((noticia) => (
+          {noticiasExibidas.map((noticia) => (
             <Link
               key={noticia._id}
               to={`/noticia/${noticia._id}`}
-              className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
+              className="group block bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 hover:shadow-2xl hover:border-gray-200 transform hover:-translate-y-1 transition-all duration-300"
             >
               {/* IMAGEM */}
               {noticia.image ? (
@@ -141,6 +149,46 @@ export default function Noticias() {
             </Link>
           ))}
         </div>
+
+        {/* PAGINAÇÃO */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-12 pt-8 border-t border-gray-300">
+            {/* Botão Anterior */}
+            <button
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+            >
+              ← Anterior
+            </button>
+
+            {/* Números das páginas */}
+            <div className="flex gap-1">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => setPage(i + 1)}
+                  className={`w-10 h-10 rounded-lg font-semibold transition ${
+                    page === i + 1
+                      ? "bg-indigo-600 text-white shadow-lg"
+                      : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
+            {/* Botão Próximo */}
+            <button
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+            >
+              Próximo →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

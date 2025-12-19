@@ -45,14 +45,13 @@ export default function Login() {
           
           {/* Logo com Título */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg ring-1 ring-indigo-500/40 bg-white/5">
+            {/* <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-lg ring-1 ring-indigo-500/40 bg-white/5">
               <img
                 src="/favicon.ico"
                 alt="Logo"
                 className="w-15 h-15 object-contain"
               />
-            </div>
-            {/* <h1 className="text-2xl sm:text-3xl font-bold text-white text-center">Admin M1</h1> */}
+            </div> */}            
             <p className="text-sm text-gray-400 mt-2">Painel de Administração</p>
           </div>
 
