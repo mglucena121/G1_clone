@@ -12,7 +12,7 @@ export default function Conteudo() {
   const [category, setCategory] = useState("");
   const [previewImage, setPreviewImage] = useState(null); // URL de prévia (arquivo ou já existente)
   const [message, setMessage] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -22,6 +22,11 @@ export default function Conteudo() {
   const editingId = params.get("id");
 
   const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  // Reset scroll ao montar o componente
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Carrega notícia para edição, se houver ?id=
   useEffect(() => {
@@ -117,8 +122,8 @@ export default function Conteudo() {
     <div className="min-h-screen bg-gray-100 flex">
       <Sidebar onToggle={setSidebarOpen} />
       <div
-        className={`transition-all duration-300 w-full p-6 ${
-          sidebarOpen ? "ml-64" : "ml-16"
+        className={`transition-all duration-300 w-full mt-16 p-4 sm:p-6 pt-10 overflow-x-hidden ml-0 md:ml-16 pl-4 md:pl-6 ${
+          sidebarOpen ? "md:!ml-64 md:!pl-8" : ""
         }`}
       >
         <div className="w-full max-w-6xl mx-auto grid grid-cols-1 xl:grid-cols-2 gap-10">

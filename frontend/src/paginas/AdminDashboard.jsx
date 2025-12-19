@@ -5,8 +5,7 @@ import Sidebar from "../components/Sidebar";
 import { BarChart3, Newspaper, TrendingUp, AlertCircle } from "lucide-react";
 
 export default function AdminDashboard() {
-  const [name, setName] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [totalNoticias, setTotalNoticias] = useState(0);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,25 +13,16 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+  // Reset scroll ao montar o componente
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    window.scrollTo(0, 0);
+  }, []);
 
-    if (!storedUser || !token) {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
       navigate("/login", { replace: true });
       return;
-    }
-
-    try {
-      const user = JSON.parse(storedUser);
-      if (user.role !== "admin" && user.role !== "user") {
-        navigate("/login", { replace: true });
-        return;
-      }
-      setName(user.name);
-    } catch (error) {
-      console.error("Erro ao ler usuário:", error);
-      navigate("/login", { replace: true });
     }
   }, [navigate]);
 
@@ -95,21 +85,15 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Sidebar onToggle={setSidebarOpen} />
       <div
-        className={`transition-all duration-300 p-6 sm:p-8 ${
-          sidebarOpen ? "ml-64" : "ml-16"
+        className={`transition-all duration-300 mt-16 p-4 sm:p-6 md:p-8 pt-10 overflow-x-hidden ml-0 md:ml-16 pl-4 md:pl-6 ${
+          sidebarOpen ? "md:!ml-64 md:!pl-8" : ""
         }`}
       >
         {/* HEADER */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
-          <div>
-            <h1 className="text-4xl sm:text-5xl font-black text-white">
-              Dashboard
-            </h1>
-            <p className="text-gray-300 mt-2">
-              Bem-vindo{name ? `, ${name}` : ""}!
-            </p>
-          </div>
-          {/* <button onClick={handleLogout} ...>Sair</button> */}
+        <div className="mb-10">
+          <h1 className="text-4xl sm:text-5xl font-black text-white">
+            Dashboard
+          </h1>
         </div>
 
         {/* CONTEÚDO DO DASHBOARD */}

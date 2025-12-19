@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 
 export default function Admin() {
   const [name, setName] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true); // estado da sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(false); // estado da sidebar
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,18 +35,18 @@ export default function Admin() {
       {/* CONTEÚDO PRINCIPAL */}
       <div
         className={`
-          transition-all duration-300 p-8
-          ${sidebarOpen ? "ml-64" : "ml-16"}
+          transition-all duration-300 p-4 sm:p-6 md:p-8 pl-14 md:pl-0
+          ${sidebarOpen ? "ml-0 md:ml-64" : "ml-0 md:ml-16"}
         `}
       >
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">
             Bem-vindo{ name ? `, ${name}` : "" }!
           </h1>
 
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+            className="px-3 py-2 sm:px-4 sm:py-2 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm sm:text-base whitespace-nowrap"
           >
             Sair
           </button>
