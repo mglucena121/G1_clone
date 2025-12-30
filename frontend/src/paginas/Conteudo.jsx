@@ -13,6 +13,7 @@ export default function Conteudo() {
   const [previewImage, setPreviewImage] = useState(null); // URL de prévia (arquivo ou já existente)
   const [message, setMessage] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,14 +29,28 @@ export default function Conteudo() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Carrega notícia para edição, se houver ?id=
+  // Verificação de autenticação - SÓ UMA VEZ ao montar
   useEffect(() => {
     if (!token || !user) {
       navigate("/login", { replace: true });
+    }
+  }, []); // Dependência vazia = executa apenas na montagem
+
+  // Carrega notícia para edição quando editingId muda
+  useEffect(() => {
+    if (!editingId) {
+      // Modo criar - limpa tudo
+      setTitle("");
+      setSubtitle("");
+      setText("");
+      setCategory("");
+      setImage(null);
+      setPreviewImage(null);
       return;
     }
-    if (!editingId) return;
 
+    // Modo editar - carrega dados
+    setIsLoading(true);
     axios
       .get(`${API}/api/conteudo/${editingId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -46,7 +61,8 @@ export default function Conteudo() {
         setSubtitle(n.subtitle || "");
         setText(n.text || "");
         setCategory(n.category || "");
-        // se já tem imagem salva, monta URL para prévia
+        setImage(null); // Não carrega o file, apenas a prévia
+        
         if (n.image) {
           const isAbsolute = /^https?:\/\//i.test(n.image);
           const base = API.replace(/\/$/, "");
@@ -57,12 +73,14 @@ export default function Conteudo() {
             : `${base}/uploads/${n.image}`;
           setPreviewImage(path);
         }
+        setIsLoading(false);
       })
       .catch((err) => {
         console.error(err);
         alert("Erro ao carregar notícia para edição");
+        setIsLoading(false);
       });
-  }, [editingId, token, user, navigate, API]);
+  }, [editingId]); // Só dispara quando editingId muda
 
   // Escolha de imagem
   function handleImage(e) {
@@ -116,6 +134,14 @@ export default function Conteudo() {
       console.error(error);
       setMessage("Erro ao salvar conteúdo.");
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Carregando conteúdo...</p>
+      </div>
+    );
   }
 
   return (
