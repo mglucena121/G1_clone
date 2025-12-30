@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
+
 
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
@@ -20,13 +22,21 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// 🔥 GARANTE QUE A PASTA /uploads EXISTA
+// -----------------------------------------------------
+const uploadsPath = path.join(__dirname, "uploads");
+
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath);
+}
+
 app.use(cors());
 app.use(express.json());
 
 // -----------------------------------------------------
 // 🔥 SERVE A PASTA /uploads PUBLICAMENTE
 // -----------------------------------------------------
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(uploadsPath));
 
 // -----------------------------------------------------
 // 🔥 SWAGGER
@@ -57,11 +67,9 @@ mongoose
     console.log("MongoDB conectado");
     await seedAdmin(); // cria admin padrão se não existir
 
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Servidor rodando na porta ${PORT}`);
-      console.log(`Acesse localmente: http://localhost:${PORT}`);
-      console.log(`Acesse na rede: http://192.168.2.22:${PORT}`);
-    });
+    app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+  });
   })
   .catch((err) => {
     console.error("Erro conectando ao MongoDB:", err);
