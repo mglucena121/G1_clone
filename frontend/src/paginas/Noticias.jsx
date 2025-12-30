@@ -7,7 +7,6 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 export default function Noticias() {
   const [noticiasAll, setNoticiasAll] = useState([]);
   const [noticias, setNoticias] = useState([]);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [page, setPage] = useState(1);
   const noticiasPerPage = 9;
@@ -68,34 +67,12 @@ export default function Noticias() {
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-slate-200 via-slate-100 to-slate-100 py-12">
       <div className="max-w-6xl mx-auto px-4">
-        <header className="flex items-center gap-4 mb-6">
-          {/* Botão hambúrguer (esquerda) */}
-          <div className="relative">
-            {menuOpen && (
-              <div className="absolute left-0 mt-3 w-44 bg-white border rounded-md shadow-lg z-20">
-                {categories.map((c) => (
-                  <button
-                    key={c.key || "todas"}
-                    onClick={() => {
-                      setSelectedCategory(c.key);
-                      setMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${selectedCategory === c.key ? "bg-gray-50 font-semibold" : ""}`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div>
-            <h1 className="text-4xl font-extrabold text-gray-900">Últimas Notícias</h1>
-          </div>
+        <header className="mb-6">
+          <h1 className="text-4xl font-extrabold text-gray-900">Últimas Notícias</h1>
         </header>
 
-        {/* Category chips (visíveis em desktop) */}
-        <nav className="hidden sm:flex items-center gap-2 mb-8">
+        {/* Category chips (visíveis em todas as telas) */}
+        <nav className="flex flex-wrap items-center gap-2 mb-8">
           {categories.map((c) => (
             <button
               key={c.key || "todas"}
