@@ -4,7 +4,8 @@ import {
   obterNoticia,
   criarNoticia,
   atualizarNoticia,
-  deletarNoticia
+  deletarNoticia,
+  atualizarDestaque
 } from "../controllers/noticiaController.js";
 import { authRequired } from "../middleware/authMiddleware.js";
 
@@ -17,6 +18,7 @@ router.get("/:id", obterNoticia);                   // GET /api/noticias/:id
 // ROTAS PROTEGIDAS (autenticado)
 router.post("/", authRequired, criarNoticia);       // POST /api/noticias
 router.put("/:id", authRequired, atualizarNoticia); // PUT /api/noticias/:id
+router.patch("/:id", authRequired, atualizarDestaque); // PATCH /api/noticias/:id (destaque)
 router.delete("/:id", authRequired, deletarNoticia);// DELETE /api/noticias/:id
 
 export default router;

@@ -27,11 +27,16 @@ export default function Noticias() {
   }, []);
 
   useEffect(() => {
-    if (!selectedCategory) {
-      setNoticias(noticiasAll);
-    } else {
-      setNoticias(noticiasAll.filter((n) => n.category === selectedCategory));
+    let filtered = noticiasAll;
+    if (selectedCategory) {
+      filtered = noticiasAll.filter((n) => n.category === selectedCategory);
     }
+    // Ordena notícias com destaque primeiro
+    const sorted = [...filtered].sort((a, b) => {
+      if (a.featured === b.featured) return 0;
+      return a.featured ? -1 : 1;
+    });
+    setNoticias(sorted);
     setPage(1);
   }, [selectedCategory, noticiasAll]);
 

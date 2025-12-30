@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Pencil, Trash2, ExternalLink, Star } from "lucide-react";
 
 export default function AdminNoticias() {
   const [noticias, setNoticias] = useState([]);
@@ -56,6 +56,28 @@ export default function AdminNoticias() {
     }
   };
 
+  const handleToggleFeatured = async (id, currentFeatured) => {
+    try {
+      await axios.patch(
+        `${API}/api/admin/noticias/${id}`,
+        { featured: !currentFeatured },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setNoticias((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, featured: !currentFeatured } : n))
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao atualizar destaque da notícia");
+    }
+  };
+
+  // Ordena notícias com destaque primeiro
+  const sortedNoticias = [...noticias].sort((a, b) => {
+    if (a.featured === b.featured) return 0;
+    return a.featured ? -1 : 1;
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <Sidebar onToggle={setSidebarOpen} />
@@ -88,11 +110,23 @@ export default function AdminNoticias() {
           <p className="text-gray-300 text-center py-8">Nenhuma notícia encontrada.</p>
         ) : (
           <div className="grid gap-4 w-full">
-            {noticias.map((n) => (
+            {sortedNoticias.map((n) => (
               <div
                 key={n._id}
-                className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-4 sm:p-5 hover:bg-slate-800/70 transition-colors"
+                className={`rounded-lg p-4 sm:p-5 transition-colors ${
+                  n.featured
+                    ? "bg-yellow-900/30 border border-yellow-600/50 hover:bg-yellow-900/40"
+                    : "bg-slate-800/50 border border-slate-700/50 hover:bg-slate-800/70"
+                }`}
               >
+                {/* Badge de destaque */}
+                {n.featured && (
+                  <div className="flex items-center gap-1 mb-2 text-yellow-400 text-xs font-semibold">
+                    <Star size={14} fill="currentColor" />
+                    Destacado
+                  </div>
+                )}
+
                 {/* Título */}
                 <div className="mb-3">
                   <h2 className="text-lg sm:text-xl text-white font-semibold line-clamp-2">{n.title}</h2>
@@ -112,6 +146,18 @@ export default function AdminNoticias() {
 
                 {/* Ações no final */}
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleToggleFeatured(n._id, n.featured)}
+                    className={`p-2 rounded transition ${
+                      n.featured
+                        ? "text-yellow-400 hover:bg-yellow-400/20"
+                        : "text-gray-500 hover:bg-gray-500/20"
+                    }`}
+                    title={n.featured ? "Remover destaque" : "Destacar"}
+                  >
+                    <Star size={18} fill={n.featured ? "currentColor" : "none"} />
+                  </button>
+
                   <Link
                     to={`/admin/conteudo?id=${n._id}`}
                     className="p-2 text-blue-600 hover:bg-blue-600/20 rounded transition"

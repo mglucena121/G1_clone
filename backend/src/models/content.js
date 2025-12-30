@@ -30,7 +30,11 @@ const ContentSchema = new mongoose.Schema(
       type: String,
       enum: ["esporte", "evento", "novidades"], // apenas esses valores são aceitos
       required: true, // categoria é obrigatória
-    },  
+    },
+    featured: {
+      type: Boolean,
+      default: false, // notícias não são destaque por padrão
+    },
   },
   {
     timestamps: true, // cria automaticamente createdAt e updatedAt

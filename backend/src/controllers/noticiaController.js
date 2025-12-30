@@ -154,3 +154,35 @@ export async function deletarNoticia(req, res) {
     res.status(500).json({ error: "Erro ao deletar notícia" });
   }
 }
+
+/**
+ * ==============================
+ * ATUALIZAR DESTAQUE DA NOTÍCIA (admin)
+ * ==============================
+ * Apenas admin pode destacar/desdestacar notícias
+ */
+export async function atualizarDestaque(req, res) {
+  try {
+    const { id } = req.params;
+    const { featured } = req.body;
+
+    // Apenas admin pode alterar destaque
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Apenas admin pode destacar notícias" });
+    }
+
+    const noticia = await Content.findById(id);
+
+    if (!noticia) {
+      return res.status(404).json({ error: "Notícia não encontrada" });
+    }
+
+    noticia.featured = featured;
+    await noticia.save();
+
+    res.status(200).json(noticia);
+  } catch (err) {
+    console.error("Erro ao atualizar destaque:", err);
+    res.status(500).json({ error: "Erro ao atualizar destaque" });
+  }
+}

@@ -80,4 +80,31 @@ router.delete("/noticias/:id", authRequired, async (req, res) => {
   }
 });
 
+// PATCH /admin/noticias/:id — atualizar destaque (apenas admin)
+router.patch("/noticias/:id", authRequired, async (req, res) => {
+  try {
+    // Apenas admin pode alterar destaque
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Apenas admin pode destacar notícias" });
+    }
+
+    const { id } = req.params;
+    const { featured } = req.body;
+
+    const noticia = await Content.findById(id);
+
+    if (!noticia) {
+      return res.status(404).json({ error: "Notícia não encontrada" });
+    }
+
+    noticia.featured = featured;
+    await noticia.save();
+
+    res.status(200).json(noticia);
+  } catch (err) {
+    console.error("Erro ao atualizar destaque:", err);
+    res.status(500).json({ error: "Erro ao atualizar destaque" });
+  }
+});
+
 export default router;
