@@ -68,7 +68,8 @@ export default function AdminNoticias() {
       );
     } catch (err) {
       console.error(err);
-      alert("Erro ao atualizar destaque da notícia");
+      const errorMessage = err.response?.data?.error || "Erro ao atualizar destaque da notícia";
+      alert(errorMessage);
     }
   };
 
