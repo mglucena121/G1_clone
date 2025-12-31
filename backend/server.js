@@ -2,9 +2,6 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
-import fs from "fs";
 
 
 import authRoutes from "./src/routes/authRoutes.js";
@@ -18,25 +15,8 @@ import noticiaRoutes from "./src/routes/noticia.routes.js";
 dotenv.config();
 const app = express();
 
-// Necessário para usar __dirname em ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// 🔥 GARANTE QUE A PASTA /uploads EXISTA
-// -----------------------------------------------------
-const uploadsPath = path.join(__dirname, "uploads");
-
-if (!fs.existsSync(uploadsPath)) {
-  fs.mkdirSync(uploadsPath);
-}
-
 app.use(cors());
 app.use(express.json());
-
-// -----------------------------------------------------
-// 🔥 SERVE A PASTA /uploads PUBLICAMENTE
-// -----------------------------------------------------
-app.use("/uploads", express.static(uploadsPath));
 
 // -----------------------------------------------------
 // 🔥 SWAGGER

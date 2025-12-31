@@ -5,24 +5,29 @@ import Content from "../models/content.js";
  */
 export async function criarConteudo(req, res) {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Imagem é obrigatória." });
-    }
+    const {
+      title,
+      subtitle,
+      category,
+      image,
+      text: bodyText,
+      content: bodyContent,
+      featured,
+    } = req.body;
 
-    const { title, text, subtitle, category } = req.body;
+    const finalText = bodyContent ?? bodyText; // aceita "content" ou "text"
 
-    if (!title || !text || !category) {
+    if (!title || !finalText || !category) {
       return res.status(400).json({ error: "Título, texto e categoria são obrigatórios." });
     }
-
-    const imagePath = `/uploads/${req.file.filename}`;
 
     const novoConteudo = await Content.create({
       title,
       subtitle,
-      text,
+      text: finalText,
       category,
-      image: imagePath,
+      image: image || "", // URL do Firebase
+      featured: !!featured,
       author: req.user?.id, // opcional, só funciona se guardar usuário
     });
 
@@ -101,13 +106,27 @@ export async function deletarConteudo(req, res) {
 export async function editarConteudo(req, res) {
   try {
     const { id } = req.params;
-    const { title, text, subtitle, category } = req.body;
+    const {
+      title,
+      subtitle,
+      category,
+      image,
+      text: bodyText,
+      content: bodyContent,
+      featured,
+    } = req.body;
 
-    const updateData = { title, text, subtitle, category };
+    const updateData = { title, subtitle, category };
+    const finalText = bodyContent ?? bodyText;
+    if (finalText !== undefined) updateData.text = finalText;
 
-    // Se veio imagem nova, substituímos a antiga
-    if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+    // Se veio URL de imagem nova do Firebase, substituímos a antiga
+    if (image) {
+      updateData.image = image;
+    }
+
+    if (featured !== undefined) {
+      updateData.featured = !!featured;
     }
 
     const conteudoAtualizado = await Content.findByIdAndUpdate(

@@ -1,5 +1,5 @@
 import express from "express";
-import upload from "../../config/multer.js";   // multer configurado
+// import upload from "../../config/multer.js";   // multer não é mais necessário
 import {
   criarConteudo,
   listarConteudos,
@@ -29,13 +29,12 @@ const router = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             required:
  *               - title
  *               - text
- *               - image
  *             properties:
  *               title:
  *                 type: string
@@ -48,7 +47,7 @@ const router = express.Router();
  *                 example: "<p>Texto formatado em HTML...</p>"
  *               image:
  *                 type: string
- *                 format: binary
+ *                 example: "https://firebasestorage.googleapis.com/..."
  *     responses:
  *       201:
  *         description: Conteúdo criado com sucesso
@@ -56,8 +55,8 @@ const router = express.Router();
  *         description: Dados inválidos
  */
 
-// 🔥 Criar conteúdo (com upload)
-router.post("/", authRequired, upload.single("image"), criarConteudo);
+// 🔥 Criar conteúdo (recebe URL do Firebase)
+router.post("/", authRequired, criarConteudo);
 
 /**
  * @swagger
@@ -136,7 +135,7 @@ router.delete("/:id", authRequired, deletarConteudo);
  *           type: string
  *     requestBody:
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -150,7 +149,7 @@ router.delete("/:id", authRequired, deletarConteudo);
  *                 type: string
  *               image:
  *                 type: string
- *                 format: binary
+ *                 example: "https://firebasestorage.googleapis.com/..."
  *     responses:
  *       200:
  *         description: Conteúdo atualizado com sucesso
@@ -159,6 +158,6 @@ router.delete("/:id", authRequired, deletarConteudo);
  *       500:
  *         description: Erro no servidor
  */
-router.put("/:id", authRequired, upload.single("image"), editarConteudo);
+router.put("/:id", authRequired, editarConteudo);
 
 export default router;
