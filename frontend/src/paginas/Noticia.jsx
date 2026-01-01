@@ -61,7 +61,7 @@ export default function Noticia() {
           {noticia.image && (
             <div className="relative h-96 w-full overflow-hidden bg-gray-200">
               <img
-                src={`${API_URL}${noticia.image}`}
+                src={noticia.image}
                 alt={noticia.title}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />

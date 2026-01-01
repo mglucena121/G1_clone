@@ -96,7 +96,7 @@ export default function Noticias() {
               {noticia.image ? (
                 <div className="relative h-52 overflow-hidden">
                   <img
-                    src={`${API_URL}${noticia.image}`}
+                    src={noticia.image}
                     alt={noticia.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

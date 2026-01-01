@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Editor } from "@tinymce/tinymce-react";
 import Sidebar from "../components/Sidebar";
+import { uploadImage } from "../utils/uploadImage";
 
 export default function Conteudo() {
   const [title, setTitle] = useState("");
@@ -59,7 +60,7 @@ export default function Conteudo() {
         const n = res.data;
         setTitle(n.title || "");
         setSubtitle(n.subtitle || "");
-        setText(n.text || "");
+        setText(n.content || n.text || "");
         setCategory(n.category || "");
         setImage(null); // Não carrega o file, apenas a prévia
         
@@ -95,24 +96,36 @@ export default function Conteudo() {
   async function handleSubmit(e) {
     e.preventDefault();
     setMessage("");
+    setIsLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("text", text);
-      formData.append("subtitle", subtitle);
-      formData.append("category", category);
-      // Só envia imagem se usuário selecionar uma nova
-      if (image) formData.append("image", image);
+      let imageURL = "";
+
+      // Se tiver imagem nova, faz upload para Firebase
+      if (image) {
+        imageURL = await uploadImage(image, "noticias");
+        console.log("Upload Firebase concluído. URL:", imageURL);
+      }
+
+      const payload = {
+        title,
+        content: text, // backend espera campo content/text; enviamos como content
+        subtitle,
+        category,
+      };
+
+      // Envia URL do Firebase se houver imagem nova
+      if (imageURL) {
+        payload.image = imageURL;
+      }
 
       const headers = {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
       };
 
       if (editingId) {
         // EDITAR
-        await axios.put(`${API}/api/conteudo/${editingId}`, formData, {
+        await axios.put(`${API}/api/conteudo/${editingId}`, payload, {
           headers,
         });
         setMessage("Notícia atualizada com sucesso!");
@@ -120,7 +133,7 @@ export default function Conteudo() {
         setTimeout(() => navigate("/admin/noticias"), 1500);
       } else {
         // CRIAR
-        await axios.post(`${API}/api/conteudo`, formData, { headers });
+        await axios.post(`${API}/api/conteudo`, payload, { headers });
         setMessage("Conteúdo criado com sucesso!");
         // limpar campos
         setTitle("");
@@ -133,6 +146,8 @@ export default function Conteudo() {
     } catch (error) {
       console.error(error);
       setMessage("Erro ao salvar conteúdo.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
