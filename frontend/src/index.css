@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+.interactive-field {
+	transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+	will-change: transform, box-shadow;
+}
+
+.interactive-field:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 26px -16px rgba(0, 0, 0, 0.35);
+	border-color: rgb(37, 99, 235);
+}
+
+.interactive-field:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}

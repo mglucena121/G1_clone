@@ -24,6 +24,7 @@ export default function Conteudo() {
   const editingId = params.get("id");
 
   const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const TINYMCE_API_KEY = import.meta.env.VITE_TINYMCE_API_KEY || "";
 
   // Reset scroll ao montar o componente
   useEffect(() => {
@@ -181,7 +182,7 @@ export default function Conteudo() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full mt-1 p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                  className="w-full mt-1 p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none interactive-field"
                   placeholder="Digite o título da notícia"
                   required
                 />
@@ -193,7 +194,7 @@ export default function Conteudo() {
                   type="text"
                   value={subtitle}
                   onChange={(e) => setSubtitle(e.target.value)}
-                  className="w-full mt-1 p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                  className="w-full mt-1 p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none interactive-field"
                   placeholder="Digite o subtítulo"
                 />
               </div>
@@ -203,7 +204,7 @@ export default function Conteudo() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full mt-1 p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                  className="w-full mt-1 p-3 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-600 outline-none interactive-field"
                   required
                 >
                   <option value="">Selecione uma categoria</option>
@@ -219,7 +220,7 @@ export default function Conteudo() {
                   type="file"
                   accept="image/*"
                   onChange={handleImage}
-                  className="block mt-2"
+                  className="block mt-2 interactive-field"
                   required={!editingId}   // na edição, opcional
                 />
                 {previewImage && (
@@ -234,7 +235,8 @@ export default function Conteudo() {
                   Conteúdo (Rich Text)
                 </label>
                 <Editor
-                  apiKey="aa8jodr16nus7m7zo3n70nupdln2l48nw85tnh09g2jkyamu"
+                  apiKey={TINYMCE_API_KEY}
+                  className="interactive-field"
                   value={text}
                   onEditorChange={(v) => setText(v)}
                   init={{
