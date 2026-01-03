@@ -1,4 +1,5 @@
 import express from "express";
+import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { authRequired, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -108,10 +109,12 @@ router.post("/", authRequired, async (req, res) => {
     if (exists)
       return res.status(400).json({ error: "Email já cadastrado" });
 
+    const passwordHash = await bcrypt.hash(password, 10);
+
     const newUser = new User({
       name,
       email,
-      passwordHash: password, // modelo já converte no pre-save
+      passwordHash,
       role: role || "user",
     });
 
@@ -166,10 +169,17 @@ router.post("/", authRequired, async (req, res) => {
  */
 router.put("/:id", authRequired, async (req, res) => {
   try {
+    const { password, ...rest } = req.body;
+    const update = { ...rest };
+
+    if (password && password.trim()) {
+      update.passwordHash = await bcrypt.hash(password, 10);
+    }
+
     const updated = await User.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      update,
+      { new: true, runValidators: true }
     ).select("-passwordHash");
 
     if (!updated)
