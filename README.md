@@ -61,7 +61,7 @@ A API do projeto está documentada utilizando **Swagger**, permitindo visualizar
 Após iniciar o back-end, a documentação pode ser acessada em:
 
 ```
-http://localhost:PORT/swagger
+http://localhost:PORT/api-docs
 ```
 
 ---
